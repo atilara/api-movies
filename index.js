@@ -26,8 +26,8 @@ var db = {
 
 app.get('/movies', (req, res) => {
   // Sempre retornar o status code da requisição
-  res.statusCode = 200;
   res.json(db.movies);
+  res.sendStatus(200);
 });
 
 app.get('/movies/:id', (req, res) => {
@@ -43,6 +43,19 @@ app.get('/movies/:id', (req, res) => {
     } else {
       res.sendStatus(404);
     }
+  }
+});
+
+app.post('/movie', (req, res) => {
+  var { id, title } = req.body;
+  if (isNaN(id)) {
+    res.sendStatus(400);
+  } else {
+    db.movies.push({
+      id,
+      title,
+    });
+    res.json(db);
   }
 });
 
