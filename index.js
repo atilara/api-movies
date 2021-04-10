@@ -94,6 +94,6 @@ app.put('/movie/:id', (req, res) => {
   }
 });
 
-app.listen(5500, () => {
+app.listen(5550, () => {
   console.log('Api rodando');
 });
