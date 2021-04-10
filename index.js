@@ -27,10 +27,9 @@ var db = {
 app.get('/movies', (req, res) => {
   // Sempre retornar o status code da requisição
   res.json(db.movies);
-  res.sendStatus(200);
 });
 
-app.get('/movies/:id', (req, res) => {
+app.get('/movie/:id', (req, res) => {
   if (isNaN(req.params.id)) {
     res.sendStatus(400);
   } else {
@@ -39,7 +38,6 @@ app.get('/movies/:id', (req, res) => {
     var movie = db.movies.find((movie) => movie.id == id);
     if (movie != undefined) {
       res.json(movie);
-      res.sendStatus(200);
     } else {
       res.sendStatus(404);
     }
@@ -55,7 +53,7 @@ app.post('/movie', (req, res) => {
       id,
       title,
     });
-    res.json(db);
+    res.sendStatus(200);
   }
 });
 
@@ -72,7 +70,26 @@ app.delete('/movie/:id', (req, res) => {
     } else {
       // Remove 1 elemento a partir do index encontrado
       db.movies.splice(index, 1);
-      res.json(db);
+      res.sendStatus(200);
+    }
+  }
+});
+
+app.put('/movie/:id', (req, res) => {
+  if (isNaN(req.params.id)) {
+    res.sendStatus(400);
+  } else {
+    var id = parseInt(req.params.id);
+    // Percorre o array e encontra o filme que possui esse id
+    var movie = db.movies.find((movie) => movie.id == id);
+    if (movie != undefined) {
+      var { title } = req.body;
+      if (title != undefined) {
+        movie.title = title;
+      }
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(404);
     }
   }
 });
