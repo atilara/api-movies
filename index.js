@@ -68,7 +68,7 @@ function authenticate(req, res, next) {
 
 app.get('/movies', authenticate, (req, res) => {
   // Acessando a variável criada dentro do middleware
-  res.json({ user: req.loggedUser, games: db.movies });
+  res.json(db.movies);
 });
 
 app.get('/movie/:id', authenticate, (req, res) => {
