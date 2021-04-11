@@ -39,12 +39,39 @@ var db = {
   ],
 };
 
-app.get('/movies', (req, res) => {
-  // Sempre retornar o status code da requisição
-  res.json(db.movies);
+// Middleware para realizar a autenticação utilizando o jwt
+function authenticate(req, res, next) {
+  // Recebe através do auth presente no postman / insomnia, que utiliza o token para autenticar
+  const authToken = req.headers['authorization'];
+  if (authToken != undefined) {
+    // Remove a palavra bearer da string recebida
+    const bearer = authToken.split(' ');
+    const token = bearer[1];
+
+    // Verifica se o token é válido, recebe o token, segredo utilizado para gerar e o callback que retorna o conteúdo do token
+    jwt.verify(token, jwtsecret, (error, data) => {
+      if (error) {
+        res.status(401);
+        res.json({ error: 'Token inválido' });
+      } else {
+        // Cria variáveis na requisição
+        req.token = token;
+        req.loggedUser = { id: data.id, email: data.email };
+        next();
+      }
+    });
+  } else {
+    res.status(401);
+    res.json({ error: 'Token inválido' });
+  }
+}
+
+app.get('/movies', authenticate, (req, res) => {
+  // Acessando a variável criada dentro do middleware
+  res.json({ user: req.loggedUser, games: db.movies });
 });
 
-app.get('/movie/:id', (req, res) => {
+app.get('/movie/:id', authenticate, (req, res) => {
   if (isNaN(req.params.id)) {
     res.sendStatus(400);
   } else {
@@ -59,7 +86,7 @@ app.get('/movie/:id', (req, res) => {
   }
 });
 
-app.post('/movie', (req, res) => {
+app.post('/movie', authenticate, (req, res) => {
   var { id, title } = req.body;
   if (isNaN(id)) {
     res.sendStatus(400);
@@ -72,7 +99,7 @@ app.post('/movie', (req, res) => {
   }
 });
 
-app.delete('/movie/:id', (req, res) => {
+app.delete('/movie/:id', authenticate, (req, res) => {
   if (isNaN(req.params.id)) {
     res.sendStatus(400);
   } else {
@@ -90,7 +117,7 @@ app.delete('/movie/:id', (req, res) => {
   }
 });
 
-app.put('/movie/:id', (req, res) => {
+app.put('/movie/:id', authenticate, (req, res) => {
   if (isNaN(req.params.id)) {
     res.sendStatus(400);
   } else {
@@ -109,7 +136,7 @@ app.put('/movie/:id', (req, res) => {
   }
 });
 
-app.post('/authenticate', (req, res) => {
+app.post('/authenticate', authenticate, (req, res) => {
   var { email, password } = req.body;
   if (email != undefined) {
     var user = db.users.find((user) => user.email == email);
