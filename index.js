@@ -36,6 +36,12 @@ var db = {
       email: 'atila.testando@gmail.com',
       password: 'tEStAnDo_AuTEnTicaCAo',
     },
+    {
+      id: 2,
+      name: 'Átila R',
+      email: 'atila@gmail.com',
+      password: 'senhafacil',
+    },
   ],
 };
 
@@ -136,7 +142,7 @@ app.put('/movie/:id', authenticate, (req, res) => {
   }
 });
 
-app.post('/authenticate', authenticate, (req, res) => {
+app.post('/authenticate', (req, res) => {
   var { email, password } = req.body;
   if (email != undefined) {
     var user = db.users.find((user) => user.email == email);
