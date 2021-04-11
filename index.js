@@ -1,7 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const app = express();
+
+// Credencial secreta (baú)
+const jwtsecret = 'laksjdfhalskdjfhaklsdjhfaklsjdhf';
 
 // Vai permitir acesso de sites externos a essa api
 app.use(cors());
@@ -23,6 +27,14 @@ var db = {
     {
       id: 3,
       title: 'Limitless',
+    },
+  ],
+  users: [
+    {
+      id: 1,
+      name: 'Átila R',
+      email: 'atila.testando@gmail.com',
+      password: 'tEStAnDo_AuTEnTicaCAo',
     },
   ],
 };
@@ -94,6 +106,44 @@ app.put('/movie/:id', (req, res) => {
     } else {
       res.sendStatus(404);
     }
+  }
+});
+
+app.post('/authenticate', (req, res) => {
+  var { email, password } = req.body;
+  if (email != undefined) {
+    var user = db.users.find((user) => user.email == email);
+    if (user != undefined) {
+      if (user.password == password) {
+        // Gera um token (chave)
+        // Se passam os dados que serão salvos, a credencial secreta (baú), e o tempo para expirar e seu callback
+        jwt.sign(
+          { id: user.id, email: user.email },
+          jwtsecret,
+          {
+            expiresIn: '24h',
+          },
+          (error, token) => {
+            if (error) {
+              res.status(400);
+              res.json({ error: 'Falha' });
+            } else {
+              res.status(200);
+              res.json({ token });
+            }
+          },
+        );
+      } else {
+        res.status(401);
+        res.json({ error: 'Autenticação não realizada' });
+      }
+    } else {
+      res.status(404);
+      res.json({ error: 'Usuário não existe na base de dados' });
+    }
+  } else {
+    res.status(400);
+    res.json({ error: 'Email inválido' });
   }
 });
 
